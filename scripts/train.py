@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import time
 import copy
-import random
+import face_recognition
 
 # Define device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -25,18 +25,31 @@ class EmotionDataset(Dataset):
         self.data = data_frame
         self.transform = transform
 
+        # Filter out images that do not contain faces
+        self.filtered_indices = self.filter_faces()
+
     def __len__(self):
-        return len(self.data)
+        return len(self.filtered_indices)
 
     def __getitem__(self, idx):
-        pixels = self.data.iloc[idx, 1]
+        actual_idx = self.filtered_indices[idx]
+        pixels = self.data.iloc[actual_idx, 1]
         pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
         image = Image.fromarray(pixels)
 
-        label = int(self.data.iloc[idx, 0])
+        label = int(self.data.iloc[actual_idx, 0])
         if self.transform:
             image = self.transform(image)
         return image, label
+
+    def filter_faces(self):
+        valid_indices = []
+        for idx in range(len(self.data)):
+            pixels = self.data.iloc[idx, 1]
+            pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
+            if face_recognition.face_locations(pixels).shape[0] > 0:
+                valid_indices.append(idx)
+        return valid_indices
 
 def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=25, patience=5):
     since = time.time()
