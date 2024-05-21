@@ -15,19 +15,21 @@ import time
 import copy
 import face_recognition
 
-# Define device
+# Define device to use GPU if available, else fallback to CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 use_cuda = torch.cuda.is_available()
 
-# Read the train images with emotion labels from ../data/train.csv
+# Custom Dataset class for handling the Emotion data
 class EmotionDataset(Dataset):
     def __init__(self, data_frame, transform=None):
         self.data = data_frame
         self.transform = transform
 
+        # Ensure the DataFrame has at least two columns: labels and pixel data
         if self.data.shape[1] < 2:
             raise ValueError("DataFrame should have at least two columns: one for labels and one for pixel data.")
 
+        # Filter out images without detectable faces
         self.filtered_indices = self.filter_faces()
 
     def __len__(self):
@@ -50,19 +52,21 @@ class EmotionDataset(Dataset):
             pixels = self.data.iloc[idx, 1]
             try:
                 pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
+                # Check if the face is detected in the image
                 if len(face_recognition.face_locations(pixels)) > 0:
                     valid_indices.append(idx)
             except Exception as e:
                 print(f"Error processing index {idx}: {e}")
         return valid_indices
 
+# Function to train the model
 def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=25, patience=5):
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
     epochs_no_improve = 0
 
-    # TensorBoard setup
+    # TensorBoard setup for logging training process
     writer = SummaryWriter(log_dir='../runs/emotion_classification')
 
     if use_cuda:
@@ -70,6 +74,12 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
         scaler = GradScaler()
     else:
         scaler = None
+
+    # Lists to store loss and accuracy for plotting learning curves
+    train_losses = []
+    val_losses = []
+    train_accs = []
+    val_accs = []
 
     for epoch in range(num_epochs):
         print(f'Epoch {epoch}/{num_epochs - 1}')
@@ -124,9 +134,13 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
             if phase == 'train':
                 writer.add_scalar('Loss/train', epoch_loss, epoch)
                 writer.add_scalar('Accuracy/train', epoch_acc, epoch)
+                train_losses.append(epoch_loss)
+                train_accs.append(epoch_acc.item())
             else:
                 writer.add_scalar('Loss/val', epoch_loss, epoch)
                 writer.add_scalar('Accuracy/val', epoch_acc, epoch)
+                val_losses.append(epoch_loss)
+                val_accs.append(epoch_acc.item())
 
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
@@ -147,6 +161,20 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
 
     model.load_state_dict(best_model_wts)
     writer.close()
+
+    # Plot learning curves
+    plt.figure(figsize=(10, 5))
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.plot(train_accs, label='Training Accuracy')
+    plt.plot(val_accs, label='Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss/Accuracy')
+    plt.title('Learning Curves')
+    plt.legend()
+    plt.savefig('../results/models/learning_curves.png')
+    plt.show()
+
     return model
 
 # Read the train images with emotion labels from ../data/train.csv
@@ -157,9 +185,9 @@ train_data, val_data = train_test_split(data, test_size=0.2)
 
 # Transformations for the training and validation sets
 transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=3),
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
+    transforms.Grayscale(num_output_channels=3),  # Convert images to grayscale with 3 channels
+    transforms.Resize((224, 224)),  # Resize images to 224x224 pixels
+    transforms.ToTensor()  # Convert images to PyTorch tensors
 ])
 
 # Create the datasets
@@ -172,33 +200,34 @@ dataloaders = {
     'val': DataLoader(val_dataset, batch_size=64, shuffle=True)
 }
 
+# Dataset sizes for computing loss and accuracy
 dataset_sizes = {
     'train': len(train_dataset),
     'val': len(val_dataset)
 }
 
-# Create the model
+# Create the model (ResNet18) and modify the final layer to match the number of emotion classes
 model = models.resnet18(pretrained=True)
 num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, 7)
+model.fc = nn.Linear(num_ftrs, 7)  # Assuming 7 emotion classes
 model = model.to(device)
 
-# Create the loss function
+# Create the loss function (CrossEntropyLoss for classification)
 criterion = nn.CrossEntropyLoss()
 
-# Create the optimizer
+# Create the optimizer (Stochastic Gradient Descent)
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
-# Create the learning rate scheduler
+# Create the learning rate scheduler to adjust learning rate over epochs
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 # Train the model
 model = train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=15)
 
-# Save the model
+# Save the trained model to disk
 torch.save(model.state_dict(), '../results/models/emotion_model.pth')
 
-# Test the model
+# Test the model using test data
 model.eval()
 
 # Read the test images with emotion labels from ../data/test.csv
@@ -208,7 +237,7 @@ test_data = pd.read_csv('../data/test.csv')
 test_dataset = EmotionDataset(data_frame=test_data, transform=transform)
 test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True)
 
-# Test the model
+# Evaluate the model on test data
 y_true = []
 y_pred = []
 with torch.no_grad():

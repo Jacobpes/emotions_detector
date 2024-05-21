@@ -117,7 +117,7 @@ while True:
 
             # Print the emotion label and probability
             current_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-            print(f"Preprocessing ... {current_time} : {emotion_label} , {emotion_prob:.0f}%")
+            print(f"Preprocessing ...\n {current_time} : {emotion_label} , {emotion_prob:.0f}%")
 
     # Display the frame with detected faces and emotion labels
     cv2.imshow('Face Detection Livestream', frame)
