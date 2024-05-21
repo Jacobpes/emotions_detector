@@ -20,16 +20,16 @@ python ./scripts/train.py
 2. Predicting Emotions on the Test Set
 To predict emotions on the test set and calculate accuracy, use the predict.py script:
 
-sh
-Kopiera kod
+```sh
 python ./scripts/predict.py
-Expected output:
+```
 
-sh
-Kopiera kod
-Accuracy on test set: 72%
 3. Predicting Emotions from a Live Video Stream
 To predict emotions from a live video stream, use the predict_live_stream.py script:
+
+```sh
+python ./scripts/predict_live_stream.py
+```
 
 Model Explanation
 Emotion Classification Model
