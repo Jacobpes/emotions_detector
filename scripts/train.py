@@ -17,6 +17,7 @@ import face_recognition
 
 # Define device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+use_cuda = torch.cuda.is_available()
 
 # Read the train images with emotion labels from ../data/train.csv
 class EmotionDataset(Dataset):
@@ -24,11 +25,9 @@ class EmotionDataset(Dataset):
         self.data = data_frame
         self.transform = transform
 
-        # Validate the DataFrame structure
         if self.data.shape[1] < 2:
             raise ValueError("DataFrame should have at least two columns: one for labels and one for pixel data.")
 
-        # Filter out images that do not contain faces
         self.filtered_indices = self.filter_faces()
 
     def __len__(self):
@@ -66,11 +65,16 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
     # TensorBoard setup
     writer = SummaryWriter(log_dir='../runs/emotion_classification')
 
+    if use_cuda:
+        from torch.cuda.amp import GradScaler, autocast
+        scaler = GradScaler()
+    else:
+        scaler = None
+
     for epoch in range(num_epochs):
         print(f'Epoch {epoch}/{num_epochs - 1}')
         print('-' * 10)
 
-        # Each epoch has a training and validation phase
         for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()
@@ -80,26 +84,32 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
             running_loss = 0.0
             running_corrects = 0
 
-            # Iterate over data.
             for inputs, labels in dataloaders[phase]:
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
-                # Zero the parameter gradients
                 optimizer.zero_grad()
 
-                # Forward
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)
-                    loss = criterion(outputs, labels)
+                    if use_cuda:
+                        with autocast():
+                            outputs = model(inputs)
+                            _, preds = torch.max(outputs, 1)
+                            loss = criterion(outputs, labels)
+                    else:
+                        outputs = model(inputs)
+                        _, preds = torch.max(outputs, 1)
+                        loss = criterion(outputs, labels)
 
-                    # Backward + optimize only if in training phase
                     if phase == 'train':
-                        loss.backward()
-                        optimizer.step()
+                        if use_cuda:
+                            scaler.scale(loss).backward()
+                            scaler.step(optimizer)
+                            scaler.update()
+                        else:
+                            loss.backward()
+                            optimizer.step()
 
-                # Statistics
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
@@ -111,7 +121,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
 
-            # TensorBoard logging
             if phase == 'train':
                 writer.add_scalar('Loss/train', epoch_loss, epoch)
                 writer.add_scalar('Accuracy/train', epoch_acc, epoch)
@@ -119,7 +128,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
                 writer.add_scalar('Loss/val', epoch_loss, epoch)
                 writer.add_scalar('Accuracy/val', epoch_acc, epoch)
 
-            # Deep copy the model if we got better accuracy
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
@@ -129,7 +137,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
 
         print()
 
-        # Early stopping
         if epochs_no_improve >= patience:
             print(f'Early stopping after {epoch} epochs')
             break
@@ -138,7 +145,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_siz
     print(f'Training complete in {time_elapsed // 60}m {time_elapsed % 60}s')
     print(f'Best val Acc: {best_acc:.4f}')
 
-    # Load best model weights
     model.load_state_dict(best_model_wts)
     writer.close()
     return model
@@ -151,7 +157,7 @@ train_data, val_data = train_test_split(data, test_size=0.2)
 
 # Transformations for the training and validation sets
 transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=3),  # Convert to 3 channels to match pretrained model input
+    transforms.Grayscale(num_output_channels=3),
     transforms.Resize((224, 224)),
     transforms.ToTensor()
 ])
@@ -162,8 +168,8 @@ val_dataset = EmotionDataset(data_frame=val_data, transform=transform)
 
 # Create the dataloaders
 dataloaders = {
-    'train': DataLoader(train_dataset, batch_size=32, shuffle=True),  # Increased batch size for faster training
-    'val': DataLoader(val_dataset, batch_size=32, shuffle=True)
+    'train': DataLoader(train_dataset, batch_size=64, shuffle=True),
+    'val': DataLoader(val_dataset, batch_size=64, shuffle=True)
 }
 
 dataset_sizes = {
@@ -172,7 +178,7 @@ dataset_sizes = {
 }
 
 # Create the model
-model = models.resnet18()
+model = models.resnet18(pretrained=True)
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 7)
 model = model.to(device)
@@ -181,13 +187,13 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # Create the optimizer
-optimizer = optim.SGD(model.parameters(), lr=0.001)
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 # Create the learning rate scheduler
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 # Train the model
-model = train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=25)
+model = train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=15)
 
 # Save the model
 torch.save(model.state_dict(), '../results/models/emotion_model.pth')
@@ -200,7 +206,7 @@ test_data = pd.read_csv('../data/test.csv')
 
 # Create the test dataset
 test_dataset = EmotionDataset(data_frame=test_data, transform=transform)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=True)  # Increased batch size for faster testing
+test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True)
 
 # Test the model
 y_true = []
