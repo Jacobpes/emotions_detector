@@ -24,6 +24,10 @@ class EmotionDataset(Dataset):
         self.data = data_frame
         self.transform = transform
 
+        # Validate the DataFrame structure
+        if self.data.shape[1] < 2:
+            raise ValueError("DataFrame should have at least two columns: one for labels and one for pixel data.")
+
         # Filter out images that do not contain faces
         self.filtered_indices = self.filter_faces()
 
@@ -45,9 +49,12 @@ class EmotionDataset(Dataset):
         valid_indices = []
         for idx in range(len(self.data)):
             pixels = self.data.iloc[idx, 1]
-            pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
-            if len(face_recognition.face_locations(pixels)) > 0:
-                valid_indices.append(idx)
+            try:
+                pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
+                if len(face_recognition.face_locations(pixels)) > 0:
+                    valid_indices.append(idx)
+            except Exception as e:
+                print(f"Error processing index {idx}: {e}")
         return valid_indices
 
 def train_model(model, criterion, optimizer, scheduler, dataloaders, dataset_sizes, num_epochs=25, patience=5):
