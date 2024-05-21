@@ -46,12 +46,13 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Open the default webcam
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(1) 
 
 if not cap.isOpened():
     print("Error: Could not open webcam.")
     exit()
 
+print("Reading video stream ...")
 print("Press 'q' to quit the livestream.")
 
 # Define the codec and create VideoWriter object for the video
@@ -109,12 +110,14 @@ while True:
                 emotion_output = emotion_model(face_tensor)
                 emotion_prediction = torch.argmax(emotion_output, dim=1)
                 emotion_label = emotion_classes[emotion_prediction.item()]
+                emotion_prob = torch.softmax(emotion_output, dim=1)[0][emotion_prediction.item()].item() * 100
 
-            # Put the emotion label on the frame
-            cv2.putText(frame, emotion_label, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+            # Put the emotion label and probability on the frame
+            cv2.putText(frame, f"{emotion_label} , {emotion_prob:.0f}%", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
 
-    # Display the number of faces found
-    print(f"Found {len(face_locations)} face(s) in the frame.")
+            # Print the emotion label and probability
+            current_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+            print(f"Preprocessing ... {current_time} : {emotion_label} , {emotion_prob:.0f}%")
 
     # Display the frame with detected faces and emotion labels
     cv2.imshow('Face Detection Livestream', frame)
