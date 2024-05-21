@@ -166,7 +166,7 @@ dataset_sizes = {
 }
 
 # Create the model
-model = models.resnet18(pretrained=True)
+model = models.resnet18(weights='imagenet')
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 7)
 model = model.to(device)
