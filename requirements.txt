@@ -1,0 +1,11 @@
+numpy
+pandas
+sklearn
+torch
+torchvision
+PIL
+matplotlib
+face_recognition
+cv2
+time
+os

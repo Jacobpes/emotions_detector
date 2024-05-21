@@ -2,6 +2,43 @@ import cv2
 import face_recognition
 import time
 import os
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+from PIL import Image
+
+# Load the emotion prediction model
+class EmotionModel(nn.Module):
+    def __init__(self):
+        super(EmotionModel, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.fc1 = nn.Linear(128 * 6 * 6, 512)
+        self.fc2 = nn.Linear(512, 7)  # Assuming 7 emotion classes
+
+    def forward(self, x):
+        x = nn.functional.relu(nn.functional.max_pool2d(self.conv1(x), 2))
+        x = nn.functional.relu(nn.functional.max_pool2d(self.conv2(x), 2))
+        x = nn.functional.relu(nn.functional.max_pool2d(self.conv3(x), 2))
+        x = x.view(x.size(0), -1)
+        x = nn.functional.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Define a function to load the model
+def load_model(path):
+    model = EmotionModel()
+    model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+    model.eval()
+    return model
+
+# Load the pre-trained emotion prediction model
+model_path = '../results/models/emotion_model.pth'
+emotion_model = load_model(model_path)
+
+# Define the emotion classes
+emotion_classes = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
 # Create output directory if it doesn't exist
 output_dir = '../results/preprocessing_test'
@@ -26,6 +63,15 @@ image_counter = 0
 
 # Record start time
 start_time = time.time()
+
+# Define a transformation to preprocess the face images
+transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Grayscale(),
+    transforms.Resize((48, 48)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5], std=[0.5])
+])
 
 while True:
     # Capture frame-by-frame
@@ -57,10 +103,20 @@ while True:
             # Draw rectangle around the face on the frame
             cv2.rectangle(frame, (left, top), (right, bottom), (255, 0, 0), 2)
 
+            # Preprocess the face image and predict the emotion
+            face_tensor = transform(face).unsqueeze(0)
+            with torch.no_grad():
+                emotion_output = emotion_model(face_tensor)
+                emotion_prediction = torch.argmax(emotion_output, dim=1)
+                emotion_label = emotion_classes[emotion_prediction.item()]
+
+            # Put the emotion label on the frame
+            cv2.putText(frame, emotion_label, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
     # Display the number of faces found
     print(f"Found {len(face_locations)} face(s) in the frame.")
 
-    # Display the frame with detected faces
+    # Display the frame with detected faces and emotion labels
     cv2.imshow('Face Detection Livestream', frame)
 
     # Exit the livestream when 'q' is pressed

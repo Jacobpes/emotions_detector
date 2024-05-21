@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import numpy as np
-import cv2 as cv
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -166,7 +165,7 @@ dataset_sizes = {
 }
 
 # Create the model
-model = models.resnet18(weights='imagenet')
+model = models.resnet18()
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 7)
 model = model.to(device)
