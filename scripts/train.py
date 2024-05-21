@@ -47,7 +47,7 @@ class EmotionDataset(Dataset):
         for idx in range(len(self.data)):
             pixels = self.data.iloc[idx, 1]
             pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
-            if face_recognition.face_locations(pixels).shape[0] > 0:
+            if len(face_recognition.face_locations(pixels)) > 0:
                 valid_indices.append(idx)
         return valid_indices
 
