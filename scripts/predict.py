@@ -18,6 +18,13 @@ class EmotionDataset(Dataset):
         self.data = data_frame
         self.transform = transform
 
+        # Ensure the DataFrame has at least two columns: labels and pixel data
+        if self.data.shape[1] < 2:
+            raise ValueError("DataFrame should have at least two columns: one for labels and one for pixel data.")
+
+        # Print the column names for debugging
+        print(f"DataFrame columns: {self.data.columns}")
+
         # Filter out images that do not contain faces
         self.filtered_indices = self.filter_faces()
 
@@ -26,11 +33,11 @@ class EmotionDataset(Dataset):
 
     def __getitem__(self, idx):
         actual_idx = self.filtered_indices[idx]
-        pixels = self.data.iloc[actual_idx, 1]
+        pixels = self.data.iloc[actual_idx]['pixels']
         pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
         image = Image.fromarray(pixels)
 
-        label = int(self.data.iloc[actual_idx, 0])
+        label = int(self.data.iloc[actual_idx]['emotion'])
         if self.transform:
             image = self.transform(image)
         return image, label
@@ -38,7 +45,7 @@ class EmotionDataset(Dataset):
     def filter_faces(self):
         valid_indices = []
         for idx in range(len(self.data)):
-            pixels = self.data.iloc[idx, 1]
+            pixels = self.data.iloc[idx]['pixels']
             pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
             if len(face_recognition.face_locations(pixels)) > 0:
                 valid_indices.append(idx)
@@ -52,7 +59,17 @@ transform = transforms.Compose([
 ])
 
 # Load the test data
-test_data = pd.read_csv('../data/test.csv')
+test_data = pd.read_csv('../data/test_with_emotions.csv')
+# Drop the index column if it exists
+test_data = test_data.drop(test_data.columns[0], axis=1, errors='ignore')
+
+# Check the structure of the DataFrame
+print(f"DataFrame head:\n{test_data.head()}")
+
+# Ensure the DataFrame has the expected columns
+expected_columns = ["emotion", "pixels"]
+if not all(column in test_data.columns for column in expected_columns):
+    raise ValueError(f"DataFrame must contain the following columns: {expected_columns}")
 
 # Create the test dataset and dataloader
 test_dataset = EmotionDataset(data_frame=test_data, transform=transform)
@@ -82,10 +99,6 @@ with torch.no_grad():
 accuracy = accuracy_score(y_true, y_pred)
 print(f'Accuracy on test set: {accuracy * 100:.2f}%')
 
-# Calculate the confusion matrix (optional, for more detailed analysis)
-# cm = confusion_matrix(y_true, y_pred)
-# print('Confusion Matrix:')
-# print(cm)
 
 if __name__ == "__main__":
     print(f'Accuracy on test set: {accuracy * 100:.2f}%')

@@ -5,30 +5,19 @@ import os
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
+from torchvision import models
 from PIL import Image
 
 # Load the emotion prediction model
-class EmotionModel(nn.Module):
-    def __init__(self):
-        super(EmotionModel, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
-        self.fc1 = nn.Linear(128 * 6 * 6, 512)
-        self.fc2 = nn.Linear(512, 7)  # Assuming 7 emotion classes
-
-    def forward(self, x):
-        x = nn.functional.relu(nn.functional.max_pool2d(self.conv1(x), 2))
-        x = nn.functional.relu(nn.functional.max_pool2d(self.conv2(x), 2))
-        x = nn.functional.relu(nn.functional.max_pool2d(self.conv3(x), 2))
-        x = x.view(x.size(0), -1)
-        x = nn.functional.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+def create_model(num_classes):
+    model = models.resnet18(pretrained=False)
+    num_ftrs = model.fc.in_features
+    model.fc = nn.Linear(num_ftrs, num_classes)  # Assuming num_classes emotion classes
+    return model
 
 # Define a function to load the model
 def load_model(path):
-    model = EmotionModel()
+    model = create_model(7)  # Assuming 7 emotion classes
     model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
     model.eval()
     return model
@@ -46,7 +35,7 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Open the default webcam
-cap = cv2.VideoCapture(1) 
+cap = cv2.VideoCapture(1)
 
 if not cap.isOpened():
     print("Error: Could not open webcam.")
@@ -68,10 +57,10 @@ start_time = time.time()
 # Define a transformation to preprocess the face images
 transform = transforms.Compose([
     transforms.ToPILImage(),
-    transforms.Grayscale(),
-    transforms.Resize((48, 48)),
+    transforms.Grayscale(num_output_channels=3),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5], std=[0.5])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 while True:
@@ -95,7 +84,7 @@ while True:
         if image_counter < 20:
             top, right, bottom, left = face_location
             face = frame[top:bottom, left:right]
-            face = cv2.resize(face, (48, 48))
+            face = cv2.resize(face, (224, 224))
             face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
             image_path = os.path.join(output_dir, f'image{image_counter}.png')
             cv2.imwrite(image_path, face)
