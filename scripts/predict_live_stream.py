@@ -23,6 +23,7 @@ def load_model(path):
     return model
 
 # Load the pre-trained emotion prediction model
+
 model_path = '../results/models/emotion_model.pth'
 emotion_model = load_model(model_path)
 
@@ -81,7 +82,7 @@ while True:
 
     # Save face images with rectangles
     for face_location in face_locations:
-        if image_counter < 20:
+        if image_counter < 500:
             top, right, bottom, left = face_location
             face = frame[top:bottom, left:right]
             face = cv2.resize(face, (224, 224))
@@ -116,7 +117,7 @@ while True:
         break
 
     # Stop after 20 seconds
-    if time.time() - start_time >= 20:
+    if time.time() - start_time >= 300:
         break
 
 # Release the webcam and video writer

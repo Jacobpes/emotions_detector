@@ -1,104 +1,53 @@
-import os
-import pandas as pd
 import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms, models
-from sklearn.metrics import accuracy_score
-from PIL import Image
+import pandas as pd
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+from tensorflow.keras.utils import to_categorical
 import face_recognition
 
-# Define device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+def load_test_data(filepath):
+    df = pd.read_csv(filepath)
+    df['pixels'] = df['pixels'].apply(lambda x: np.fromstring(x, dtype=int, sep=' '))
 
-# Define the EmotionDataset class
-class EmotionDataset(Dataset):
-    def __init__(self, data_frame, transform=None):
-        self.data = data_frame
-        self.transform = transform
+    X = []
+    y = []
+    images = []
 
-        # Ensure the DataFrame has at least two columns: labels and pixel data
-        if self.data.shape[1] < 2:
-            raise ValueError("DataFrame should have at least two columns: one for labels and one for pixel data.")
+    for index, row in df.iterrows():
+        image = row['pixels'].reshape(48, 48).astype('uint8')
+        face_locations = face_recognition.face_locations(image, model="hog")
+        if face_locations:
+            X.append(row['pixels'] / 255.0)  # Normalize pixel values
+            y.append(row['emotion'])
+            images.append(image)  # Save original image for any potential review
 
-        # Print the column names for debugging
-        print(f"DataFrame columns: {self.data.columns}")
+    X = np.array(X).reshape(-1, 48, 48, 1)  # Reshape for CNN, 1 channel for grayscale
+    y = np.array(y)
+    return X, y, images
 
-        # Filter out images that do not contain faces
-        self.filtered_indices = self.filter_faces()
+def predict_emotions(model, X):
+    predictions = model.predict(X)
+    return predictions
 
-    def __len__(self):
-        return len(self.filtered_indices)
+def calculate_accuracy(y_true, y_pred):
+    return np.mean(y_true == y_pred) * 100
 
-    def __getitem__(self, idx):
-        actual_idx = self.filtered_indices[idx]
-        pixels = self.data.iloc[actual_idx]['pixels']
-        pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
-        image = Image.fromarray(pixels)
+def main():
+    # Load test data
+    test_filepath = '../data/test_with_emotions.csv'
+    X_test, y_test, test_images = load_test_data(test_filepath)
+    
+    # Load the model
+    model_path = 'best_model.keras'
+    model = load_model(model_path)
 
-        label = int(self.data.iloc[actual_idx]['emotion'])
-        if self.transform:
-            image = self.transform(image)
-        return image, label
+    # Make predictions
+    predictions = predict_emotions(model, X_test)
+    predicted_classes = np.argmax(predictions, axis=1)
 
-    def filter_faces(self):
-        valid_indices = []
-        for idx in range(len(self.data)):
-            pixels = self.data.iloc[idx]['pixels']
-            pixels = np.array(pixels.split(), dtype='uint8').reshape(48, 48)
-            if len(face_recognition.face_locations(pixels)) > 0:
-                valid_indices.append(idx)
-        return valid_indices
-
-# Define the transformation
-transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=3),  # Convert to 3 channels to match pretrained model input
-    transforms.Resize((224, 224)),
-    transforms.ToTensor()
-])
-
-# Load the test data
-test_data = pd.read_csv('../data/test_with_emotions.csv')
-# Drop the index column if it exists
-test_data = test_data.drop(test_data.columns[0], axis=1, errors='ignore')
-
-# Check the structure of the DataFrame
-print(f"DataFrame head:\n{test_data.head()}")
-
-# Ensure the DataFrame has the expected columns
-expected_columns = ["emotion", "pixels"]
-if not all(column in test_data.columns for column in expected_columns):
-    raise ValueError(f"DataFrame must contain the following columns: {expected_columns}")
-
-# Create the test dataset and dataloader
-test_dataset = EmotionDataset(data_frame=test_data, transform=transform)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)  # No need to shuffle for testing
-
-# Load the model
-model = models.resnet18()
-num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, 7)
-model.load_state_dict(torch.load('../results/models/emotion_model.pth', map_location=device))
-model = model.to(device)
-model.eval()
-
-# Predict on the test set
-y_true = []
-y_pred = []
-with torch.no_grad():
-    for inputs, labels in test_dataloader:
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-        outputs = model(inputs)
-        _, preds = torch.max(outputs, 1)
-        y_true.extend(labels.tolist())
-        y_pred.extend(preds.tolist())
-
-# Calculate the accuracy
-accuracy = accuracy_score(y_true, y_pred)
-print(f'Accuracy on test set: {accuracy * 100:.2f}%')
-
+    # Calculate accuracy
+    accuracy = calculate_accuracy(y_test, predicted_classes)
+    print(f'Accuracy of predictions: {accuracy:.2f}%')
 
 if __name__ == "__main__":
-    print(f'Accuracy on test set: {accuracy * 100:.2f}%')
+    main()
