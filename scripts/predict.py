@@ -1,9 +1,68 @@
+# Imports
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.layers import Layer, Dense, GlobalAveragePooling2D, GlobalMaxPooling2D, Reshape, Multiply, Add, Activation, Conv2D
 import face_recognition
+
+class ChannelAttention(Layer):
+    def __init__(self, ratio=8, **kwargs):
+        super(ChannelAttention, self).__init__(**kwargs)
+        self.ratio = ratio
+
+    def build(self, input_shape):
+        self.shared_layer_one = Dense(input_shape[-1] // self.ratio,
+                                      activation='relu',
+                                      kernel_initializer='he_normal',
+                                      use_bias=True,
+                                      bias_initializer='zeros')
+        self.shared_layer_two = Dense(input_shape[-1],
+                                      kernel_initializer='he_normal',
+                                      use_bias=True,
+                                      bias_initializer='zeros')
+        super(ChannelAttention, self).build(input_shape)
+
+    def call(self, input_tensor):
+        avg_pool = GlobalAveragePooling2D()(input_tensor)
+        avg_pool = Reshape((1, 1, avg_pool.shape[1]))(avg_pool)
+        avg_pool = self.shared_layer_one(avg_pool)
+        avg_pool = self.shared_layer_two(avg_pool)
+
+        max_pool = GlobalMaxPooling2D()(input_tensor)
+        max_pool = Reshape((1, 1, max_pool.shape[1]))(max_pool)
+        max_pool = self.shared_layer_one(max_pool)
+        max_pool = self.shared_layer_two(max_pool)
+
+        scale = Activation('sigmoid')(Add()([avg_pool, max_pool]))
+        return Multiply()([input_tensor, scale])
+
+    def get_config(self):
+        config = super(ChannelAttention, self).get_config()
+        config.update({'ratio': self.ratio})
+        return config
+
+class SpatialAttention(Layer):
+    def __init__(self, kernel_size=7, **kwargs):
+        super(SpatialAttention, self).__init__(**kwargs)
+        self.kernel_size = kernel_size
+        self.conv2d = Conv2D(1, self.kernel_size, padding='same', activation='sigmoid', kernel_initializer='he_normal', use_bias=False)
+
+    def call(self, input_tensor):
+        avg_pool = tf.reduce_mean(input_tensor, axis=-1, keepdims=True)
+        max_pool = tf.reduce_max(input_tensor, axis=-1, keepdims=True)
+        concat = tf.concat([avg_pool, max_pool], axis=-1)
+        return Multiply()([input_tensor, self.conv2d(concat)])
+
+    def get_config(self):
+        config = super(SpatialAttention, self).get_config()
+        config.update({'kernel_size': self.kernel_size})
+        return config
+        
+    def build(self, input_shape):
+        self.conv2d = Conv2D(1, self.kernel_size, padding='same', activation='sigmoid', kernel_initializer='he_normal', use_bias=False)
+        super(SpatialAttention, self).build(input_shape)  # Mark the layer as built
+
 
 def load_test_data(filepath):
     df = pd.read_csv(filepath)
@@ -38,8 +97,8 @@ def main():
     X_test, y_test, test_images = load_test_data(test_filepath)
     
     # Load the model
-    model_path = 'best_model.keras'
-    model = load_model(model_path)
+    model_path = '../results/models/best_model.keras'
+    model = load_model(model_path, custom_objects={'ChannelAttention': ChannelAttention, 'SpatialAttention': SpatialAttention})
 
     # Make predictions
     predictions = predict_emotions(model, X_test)
