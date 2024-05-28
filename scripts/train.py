@@ -195,23 +195,23 @@ model = Sequential([
     Conv2D(256, (5, 5), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_2'),
     BatchNormalization(name='batchnorm_2'),
     MaxPooling2D(pool_size=(2, 2), name='maxpool2d_1'),
-    Dropout(0.25, name='dropout_1'),
+    Dropout(0.27, name='dropout_1'),
     Conv2D(128, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_3'),
     BatchNormalization(name='batchnorm_3'),
     Conv2D(128, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_4'),
     BatchNormalization(name='batchnorm_4'),
     MaxPooling2D(pool_size=(2, 2), name='maxpool2d_2'),
-    Dropout(0.25, name='dropout_2'),
+    Dropout(0.27, name='dropout_2'),
     Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_5'),
     BatchNormalization(name='batchnorm_5'),
     Conv2D(512, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_6'),
     BatchNormalization(name='batchnorm_6'),
     MaxPooling2D(pool_size=(2, 2), name='maxpool2d_3'),
-    Dropout(0.25, name='dropout_3'),
+    Dropout(0.27, name='dropout_3'),
     Flatten(name='flatten'),
     Dense(256, activation='elu', kernel_initializer='he_normal', name='dense_1'),
     BatchNormalization(name='batchnorm_7'),
-    Dropout(0.25, name='dropout_4'),
+    Dropout(0.27, name='dropout_4'),
     Dense(7, activation='softmax', name='out_layer')
 ])
 
@@ -222,13 +222,13 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 model.summary()
 
 # Callbacks
-early_stopping = EarlyStopping(monitor='val_accuracy', min_delta=0.00005, patience=11, verbose=1, restore_best_weights=True)
-lr_scheduler = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=7, min_lr=1e-7, verbose=1)
+early_stopping = EarlyStopping(monitor='val_accuracy', min_delta=0.00005, patience=8, verbose=1, restore_best_weights=True)
+lr_scheduler = ReduceLROnPlateau(monitor='val_accuracy', factor=0.4, patience=5, min_lr=1e-7, verbose=1)
 model_checkpoint = ModelCheckpoint('best_model.keras', monitor='val_accuracy', save_best_only=True, verbose=1)
 callbacks = [early_stopping, lr_scheduler, model_checkpoint]
 
 def main():
-    filepath = '../data/train.csv'
+    filepath = '/data/train.csv'
     if not os.path.exists(filepath):
         print(f"Error: The file {filepath} does not exist.")
         return
