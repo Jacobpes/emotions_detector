@@ -235,7 +235,7 @@ def main():
     X_train, X_val, y_train, y_val = load_data_with_face_filter(filepath)
     history = model.fit(X_train, y_train, epochs=60, validation_data=(X_val, y_val), batch_size=64, callbacks=callbacks)
     # save the model
-    model.save('best_model.keras')
+    model.save('results/models/best_model.keras')
 
 if __name__ == "__main__":
     main()
