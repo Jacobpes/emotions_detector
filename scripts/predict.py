@@ -58,7 +58,7 @@ class SpatialAttention(Layer):
         config = super(SpatialAttention, self).get_config()
         config.update({'kernel_size': self.kernel_size})
         return config
-        
+
     def build(self, input_shape):
         self.conv2d = Conv2D(1, self.kernel_size, padding='same', activation='sigmoid', kernel_initializer='he_normal', use_bias=False)
         super(SpatialAttention, self).build(input_shape)  # Mark the layer as built
@@ -93,11 +93,11 @@ def calculate_accuracy(y_true, y_pred):
 
 def main():
     # Load test data
-    test_filepath = '../data/test_with_emotions.csv'
+    test_filepath = '/data/test_with_emotions.csv'
     X_test, y_test, test_images = load_test_data(test_filepath)
     
     # Load the model
-    model_path = '../results/models/best_model.keras'
+    model_path = 'best_model.keras'
     model = load_model(model_path, custom_objects={'ChannelAttention': ChannelAttention, 'SpatialAttention': SpatialAttention})
 
     # Make predictions
