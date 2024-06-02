@@ -9,3 +9,9 @@ face_recognition
 cv2
 time
 os
+shutil
+random
+argparse
+tensorflow
+keras
+tkinter

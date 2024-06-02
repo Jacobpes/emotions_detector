@@ -1,0 +1,560 @@
+CUDA is available. Configured TensorFlow to use the GPU.
+Model: "sequential_22"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ conv2d_1 (Conv2D)           (None, 48, 48, 512)       5120      
+                                                                 
+ batchnorm_1 (BatchNormaliz  (None, 48, 48, 512)       2048      
+ ation)                                                          
+                                                                 
+ conv2d_2 (Conv2D)           (None, 48, 48, 256)       1179904   
+                                                                 
+ batchnorm_2 (BatchNormaliz  (None, 48, 48, 256)       1024      
+ ation)                                                          
+                                                                 
+ maxpool2d_1 (MaxPooling2D)  (None, 24, 24, 256)       0         
+                                                                 
+ dropout_1 (Dropout)         (None, 24, 24, 256)       0         
+                                                                 
+ conv2d_3 (Conv2D)           (None, 24, 24, 128)       295040    
+                                                                 
+ batchnorm_3 (BatchNormaliz  (None, 24, 24, 128)       512       
+ ation)                                                          
+                                                                 
+ conv2d_4 (Conv2D)           (None, 24, 24, 128)       147584    
+                                                                 
+ batchnorm_4 (BatchNormaliz  (None, 24, 24, 128)       512       
+ ation)                                                          
+                                                                 
+ maxpool2d_2 (MaxPooling2D)  (None, 12, 12, 128)       0         
+                                                                 
+ dropout_2 (Dropout)         (None, 12, 12, 128)       0         
+                                                                 
+ conv2d_5 (Conv2D)           (None, 12, 12, 256)       295168    
+                                                                 
+ batchnorm_5 (BatchNormaliz  (None, 12, 12, 256)       1024      
+ ation)                                                          
+                                                                 
+ conv2d_6 (Conv2D)           (None, 12, 12, 512)       1180160   
+                                                                 
+ batchnorm_6 (BatchNormaliz  (None, 12, 12, 512)       2048      
+ ation)                                                          
+                                                                 
+ maxpool2d_3 (MaxPooling2D)  (None, 6, 6, 512)         0         
+                                                                 
+ dropout_3 (Dropout)         (None, 6, 6, 512)         0         
+                                                                 
+ flatten (Flatten)           (None, 18432)             0         
+                                                                 
+ dense_1 (Dense)             (None, 256)               4718848   
+                                                                 
+ batchnorm_7 (BatchNormaliz  (None, 256)               1024      
+ ation)                                                          
+                                                                 
+ dropout_4 (Dropout)         (None, 256)               0         
+                                                                 
+ out_layer (Dense)           (None, 7)                 1799      
+                                                                 
+=================================================================
+Total params: 7831815 (29.88 MB)
+Trainable params: 7827719 (29.86 MB)
+Non-trainable params: 4096 (16.00 KB)
+_________________________________________________________________
+Epoch 1/120
+
+Epoch 1: val_accuracy improved from -inf to 0.40390, saving model to drive/MyDrive/best_model.h5
+/usr/local/lib/python3.10/dist-packages/keras/src/engine/training.py:3103: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(
+427/427 - 23s - loss: 1.8935 - accuracy: 0.2713 - val_loss: 1.5393 - val_accuracy: 0.4039 - lr: 0.0010 - 23s/epoch - 54ms/step
+Epoch 2/120
+
+Epoch 2: val_accuracy improved from 0.40390 to 0.51532, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.5510 - accuracy: 0.3998 - val_loss: 1.2974 - val_accuracy: 0.5153 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 3/120
+
+Epoch 3: val_accuracy did not improve from 0.51532
+427/427 - 15s - loss: 1.3849 - accuracy: 0.4734 - val_loss: 1.3103 - val_accuracy: 0.5014 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 4/120
+
+Epoch 4: val_accuracy improved from 0.51532 to 0.53691, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.2710 - accuracy: 0.5179 - val_loss: 1.2036 - val_accuracy: 0.5369 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 5/120
+
+Epoch 5: val_accuracy improved from 0.53691 to 0.56825, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.1884 - accuracy: 0.5445 - val_loss: 1.1862 - val_accuracy: 0.5682 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 6/120
+
+Epoch 6: val_accuracy improved from 0.56825 to 0.57730, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.1390 - accuracy: 0.5694 - val_loss: 1.1039 - val_accuracy: 0.5773 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 7/120
+
+Epoch 7: val_accuracy did not improve from 0.57730
+427/427 - 15s - loss: 1.1132 - accuracy: 0.5788 - val_loss: 1.1039 - val_accuracy: 0.5759 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 8/120
+
+Epoch 8: val_accuracy improved from 0.57730 to 0.59749, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.0801 - accuracy: 0.5912 - val_loss: 1.0244 - val_accuracy: 0.5975 - lr: 0.0010 - 16s/epoch - 39ms/step
+Epoch 9/120
+
+Epoch 9: val_accuracy improved from 0.59749 to 0.61072, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.0591 - accuracy: 0.6011 - val_loss: 1.0483 - val_accuracy: 0.6107 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 10/120
+
+Epoch 10: val_accuracy did not improve from 0.61072
+427/427 - 15s - loss: 1.0321 - accuracy: 0.6133 - val_loss: 1.0309 - val_accuracy: 0.6079 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 11/120
+
+Epoch 11: val_accuracy improved from 0.61072 to 0.61281, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 1.0207 - accuracy: 0.6149 - val_loss: 1.0100 - val_accuracy: 0.6128 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 12/120
+
+Epoch 12: val_accuracy did not improve from 0.61281
+427/427 - 15s - loss: 0.9971 - accuracy: 0.6279 - val_loss: 1.0218 - val_accuracy: 0.6107 - lr: 0.0010 - 15s/epoch - 35ms/step
+Epoch 13/120
+
+Epoch 13: val_accuracy improved from 0.61281 to 0.63579, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.9813 - accuracy: 0.6333 - val_loss: 0.9578 - val_accuracy: 0.6358 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 14/120
+
+Epoch 14: val_accuracy did not improve from 0.63579
+427/427 - 15s - loss: 0.9611 - accuracy: 0.6402 - val_loss: 0.9939 - val_accuracy: 0.6226 - lr: 0.0010 - 15s/epoch - 35ms/step
+Epoch 15/120
+
+Epoch 15: val_accuracy improved from 0.63579 to 0.63858, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.9587 - accuracy: 0.6405 - val_loss: 0.9632 - val_accuracy: 0.6386 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 16/120
+
+Epoch 16: val_accuracy did not improve from 0.63858
+427/427 - 15s - loss: 0.9393 - accuracy: 0.6486 - val_loss: 0.9533 - val_accuracy: 0.6302 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 17/120
+
+Epoch 17: val_accuracy did not improve from 0.63858
+427/427 - 15s - loss: 0.9276 - accuracy: 0.6536 - val_loss: 1.0267 - val_accuracy: 0.6135 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 18/120
+
+Epoch 18: val_accuracy did not improve from 0.63858
+427/427 - 15s - loss: 0.9181 - accuracy: 0.6564 - val_loss: 1.0502 - val_accuracy: 0.6281 - lr: 0.0010 - 15s/epoch - 35ms/step
+Epoch 19/120
+
+Epoch 19: val_accuracy did not improve from 0.63858
+427/427 - 15s - loss: 0.9014 - accuracy: 0.6653 - val_loss: 0.9429 - val_accuracy: 0.6365 - lr: 0.0010 - 15s/epoch - 35ms/step
+Epoch 20/120
+
+Epoch 20: val_accuracy improved from 0.63858 to 0.64415, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.8907 - accuracy: 0.6679 - val_loss: 0.9659 - val_accuracy: 0.6442 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 21/120
+
+Epoch 21: val_accuracy did not improve from 0.64415
+427/427 - 15s - loss: 0.8787 - accuracy: 0.6708 - val_loss: 1.0273 - val_accuracy: 0.6260 - lr: 0.0010 - 15s/epoch - 35ms/step
+Epoch 22/120
+
+Epoch 22: val_accuracy did not improve from 0.64415
+427/427 - 15s - loss: 0.8700 - accuracy: 0.6767 - val_loss: 0.9687 - val_accuracy: 0.6421 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 23/120
+
+Epoch 23: val_accuracy improved from 0.64415 to 0.65320, saving model to drive/MyDrive/best_model.h5
+427/427 - 17s - loss: 0.8601 - accuracy: 0.6808 - val_loss: 0.9761 - val_accuracy: 0.6532 - lr: 0.0010 - 17s/epoch - 39ms/step
+Epoch 24/120
+
+Epoch 24: val_accuracy did not improve from 0.65320
+427/427 - 15s - loss: 0.8633 - accuracy: 0.6806 - val_loss: 0.9413 - val_accuracy: 0.6435 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 25/120
+
+Epoch 25: val_accuracy did not improve from 0.65320
+427/427 - 15s - loss: 0.8442 - accuracy: 0.6860 - val_loss: 0.9885 - val_accuracy: 0.6462 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 26/120
+
+Epoch 26: val_accuracy did not improve from 0.65320
+427/427 - 15s - loss: 0.8400 - accuracy: 0.6877 - val_loss: 1.0236 - val_accuracy: 0.6274 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 27/120
+
+Epoch 27: val_accuracy improved from 0.65320 to 0.65460, saving model to drive/MyDrive/best_model.h5
+427/427 - 17s - loss: 0.8210 - accuracy: 0.6943 - val_loss: 0.9374 - val_accuracy: 0.6546 - lr: 0.0010 - 17s/epoch - 39ms/step
+Epoch 28/120
+
+Epoch 28: val_accuracy improved from 0.65460 to 0.65669, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.8132 - accuracy: 0.6985 - val_loss: 0.9406 - val_accuracy: 0.6567 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 29/120
+
+Epoch 29: val_accuracy did not improve from 0.65669
+427/427 - 15s - loss: 0.8088 - accuracy: 0.6993 - val_loss: 0.9219 - val_accuracy: 0.6511 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 30/120
+
+Epoch 30: val_accuracy did not improve from 0.65669
+427/427 - 15s - loss: 0.8001 - accuracy: 0.7010 - val_loss: 0.9563 - val_accuracy: 0.6372 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 31/120
+
+Epoch 31: val_accuracy did not improve from 0.65669
+427/427 - 15s - loss: 0.7910 - accuracy: 0.7042 - val_loss: 0.9971 - val_accuracy: 0.6337 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 32/120
+
+Epoch 32: val_accuracy improved from 0.65669 to 0.66156, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.7819 - accuracy: 0.7093 - val_loss: 0.9566 - val_accuracy: 0.6616 - lr: 0.0010 - 16s/epoch - 38ms/step
+Epoch 33/120
+
+Epoch 33: val_accuracy did not improve from 0.66156
+427/427 - 15s - loss: 0.7766 - accuracy: 0.7128 - val_loss: 0.9723 - val_accuracy: 0.6539 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 34/120
+
+Epoch 34: val_accuracy improved from 0.66156 to 0.66574, saving model to drive/MyDrive/best_model.h5
+427/427 - 17s - loss: 0.7549 - accuracy: 0.7179 - val_loss: 0.9138 - val_accuracy: 0.6657 - lr: 0.0010 - 17s/epoch - 39ms/step
+Epoch 35/120
+
+Epoch 35: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7606 - accuracy: 0.7180 - val_loss: 0.9574 - val_accuracy: 0.6616 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 36/120
+
+Epoch 36: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7547 - accuracy: 0.7194 - val_loss: 0.9646 - val_accuracy: 0.6497 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 37/120
+
+Epoch 37: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7463 - accuracy: 0.7194 - val_loss: 0.9747 - val_accuracy: 0.6525 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 38/120
+
+Epoch 38: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7353 - accuracy: 0.7276 - val_loss: 0.9553 - val_accuracy: 0.6393 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 39/120
+
+Epoch 39: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7329 - accuracy: 0.7271 - val_loss: 0.9779 - val_accuracy: 0.6630 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 40/120
+
+Epoch 40: val_accuracy did not improve from 0.66574
+427/427 - 15s - loss: 0.7201 - accuracy: 0.7341 - val_loss: 0.9568 - val_accuracy: 0.6657 - lr: 0.0010 - 15s/epoch - 36ms/step
+Epoch 41/120
+
+Epoch 41: ReduceLROnPlateau reducing learning rate to 0.000840000039897859.
+
+Epoch 41: val_accuracy improved from 0.66574 to 0.67688, saving model to drive/MyDrive/best_model.h5
+427/427 - 17s - loss: 0.7194 - accuracy: 0.7342 - val_loss: 0.9641 - val_accuracy: 0.6769 - lr: 0.0010 - 17s/epoch - 40ms/step
+Epoch 42/120
+
+Epoch 42: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.7010 - accuracy: 0.7420 - val_loss: 0.9549 - val_accuracy: 0.6762 - lr: 8.4000e-04 - 15s/epoch - 36ms/step
+Epoch 43/120
+
+Epoch 43: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6838 - accuracy: 0.7469 - val_loss: 1.0162 - val_accuracy: 0.6469 - lr: 8.4000e-04 - 15s/epoch - 35ms/step
+Epoch 44/120
+
+Epoch 44: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6768 - accuracy: 0.7481 - val_loss: 0.9726 - val_accuracy: 0.6643 - lr: 8.4000e-04 - 15s/epoch - 35ms/step
+Epoch 45/120
+
+Epoch 45: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6674 - accuracy: 0.7524 - val_loss: 0.9568 - val_accuracy: 0.6546 - lr: 8.4000e-04 - 15s/epoch - 36ms/step
+Epoch 46/120
+
+Epoch 46: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6636 - accuracy: 0.7538 - val_loss: 0.9876 - val_accuracy: 0.6678 - lr: 8.4000e-04 - 15s/epoch - 35ms/step
+Epoch 47/120
+
+Epoch 47: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6560 - accuracy: 0.7545 - val_loss: 0.9983 - val_accuracy: 0.6748 - lr: 8.4000e-04 - 15s/epoch - 35ms/step
+Epoch 48/120
+
+Epoch 48: ReduceLROnPlateau reducing learning rate to 0.0007056000432930886.
+
+Epoch 48: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6527 - accuracy: 0.7584 - val_loss: 0.9813 - val_accuracy: 0.6706 - lr: 8.4000e-04 - 15s/epoch - 35ms/step
+Epoch 49/120
+
+Epoch 49: val_accuracy did not improve from 0.67688
+427/427 - 15s - loss: 0.6296 - accuracy: 0.7674 - val_loss: 1.0128 - val_accuracy: 0.6769 - lr: 7.0560e-04 - 15s/epoch - 36ms/step
+Epoch 50/120
+
+Epoch 50: val_accuracy improved from 0.67688 to 0.68175, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.6270 - accuracy: 0.7682 - val_loss: 0.9856 - val_accuracy: 0.6818 - lr: 7.0560e-04 - 16s/epoch - 38ms/step
+Epoch 51/120
+
+Epoch 51: val_accuracy did not improve from 0.68175
+427/427 - 15s - loss: 0.6191 - accuracy: 0.7701 - val_loss: 0.9893 - val_accuracy: 0.6734 - lr: 7.0560e-04 - 15s/epoch - 36ms/step
+Epoch 52/120
+
+Epoch 52: val_accuracy did not improve from 0.68175
+427/427 - 15s - loss: 0.6095 - accuracy: 0.7710 - val_loss: 1.0070 - val_accuracy: 0.6811 - lr: 7.0560e-04 - 15s/epoch - 35ms/step
+Epoch 53/120
+
+Epoch 53: val_accuracy did not improve from 0.68175
+427/427 - 15s - loss: 0.6056 - accuracy: 0.7755 - val_loss: 0.9856 - val_accuracy: 0.6790 - lr: 7.0560e-04 - 15s/epoch - 35ms/step
+Epoch 54/120
+
+Epoch 54: val_accuracy improved from 0.68175 to 0.68315, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.5984 - accuracy: 0.7788 - val_loss: 0.9960 - val_accuracy: 0.6831 - lr: 7.0560e-04 - 16s/epoch - 38ms/step
+Epoch 55/120
+
+Epoch 55: ReduceLROnPlateau reducing learning rate to 0.000592704014852643.
+
+Epoch 55: val_accuracy did not improve from 0.68315
+427/427 - 15s - loss: 0.5897 - accuracy: 0.7817 - val_loss: 1.0268 - val_accuracy: 0.6825 - lr: 7.0560e-04 - 15s/epoch - 36ms/step
+Epoch 56/120
+
+Epoch 56: val_accuracy improved from 0.68315 to 0.68663, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.5799 - accuracy: 0.7871 - val_loss: 1.0092 - val_accuracy: 0.6866 - lr: 5.9270e-04 - 16s/epoch - 38ms/step
+Epoch 57/120
+
+Epoch 57: val_accuracy did not improve from 0.68663
+427/427 - 15s - loss: 0.5730 - accuracy: 0.7873 - val_loss: 1.0222 - val_accuracy: 0.6818 - lr: 5.9270e-04 - 15s/epoch - 36ms/step
+Epoch 58/120
+
+Epoch 58: val_accuracy improved from 0.68663 to 0.68802, saving model to drive/MyDrive/best_model.h5
+427/427 - 17s - loss: 0.5710 - accuracy: 0.7888 - val_loss: 1.0340 - val_accuracy: 0.6880 - lr: 5.9270e-04 - 17s/epoch - 39ms/step
+Epoch 59/120
+
+Epoch 59: val_accuracy did not improve from 0.68802
+427/427 - 15s - loss: 0.5644 - accuracy: 0.7943 - val_loss: 1.0267 - val_accuracy: 0.6776 - lr: 5.9270e-04 - 15s/epoch - 36ms/step
+Epoch 60/120
+
+Epoch 60: val_accuracy did not improve from 0.68802
+427/427 - 15s - loss: 0.5552 - accuracy: 0.7932 - val_loss: 0.9878 - val_accuracy: 0.6852 - lr: 5.9270e-04 - 15s/epoch - 35ms/step
+Epoch 61/120
+
+Epoch 61: val_accuracy did not improve from 0.68802
+427/427 - 15s - loss: 0.5528 - accuracy: 0.7975 - val_loss: 1.0577 - val_accuracy: 0.6818 - lr: 5.9270e-04 - 15s/epoch - 35ms/step
+Epoch 62/120
+
+Epoch 62: ReduceLROnPlateau reducing learning rate to 0.0004978713509626686.
+
+Epoch 62: val_accuracy did not improve from 0.68802
+427/427 - 15s - loss: 0.5443 - accuracy: 0.7992 - val_loss: 1.1006 - val_accuracy: 0.6762 - lr: 5.9270e-04 - 15s/epoch - 35ms/step
+Epoch 63/120
+
+Epoch 63: val_accuracy improved from 0.68802 to 0.68942, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.5340 - accuracy: 0.8021 - val_loss: 1.0680 - val_accuracy: 0.6894 - lr: 4.9787e-04 - 16s/epoch - 38ms/step
+Epoch 64/120
+
+Epoch 64: val_accuracy did not improve from 0.68942
+427/427 - 15s - loss: 0.5177 - accuracy: 0.8084 - val_loss: 1.0992 - val_accuracy: 0.6880 - lr: 4.9787e-04 - 15s/epoch - 36ms/step
+Epoch 65/120
+
+Epoch 65: val_accuracy did not improve from 0.68942
+427/427 - 15s - loss: 0.5190 - accuracy: 0.8103 - val_loss: 1.0203 - val_accuracy: 0.6769 - lr: 4.9787e-04 - 15s/epoch - 35ms/step
+Epoch 66/120
+
+Epoch 66: val_accuracy improved from 0.68942 to 0.69708, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.5178 - accuracy: 0.8097 - val_loss: 1.0493 - val_accuracy: 0.6971 - lr: 4.9787e-04 - 16s/epoch - 38ms/step
+Epoch 67/120
+
+Epoch 67: val_accuracy did not improve from 0.69708
+427/427 - 15s - loss: 0.5129 - accuracy: 0.8090 - val_loss: 1.0322 - val_accuracy: 0.6887 - lr: 4.9787e-04 - 15s/epoch - 35ms/step
+Epoch 68/120
+
+Epoch 68: val_accuracy did not improve from 0.69708
+427/427 - 15s - loss: 0.5027 - accuracy: 0.8140 - val_loss: 1.0670 - val_accuracy: 0.6852 - lr: 4.9787e-04 - 15s/epoch - 36ms/step
+Epoch 69/120
+
+Epoch 69: ReduceLROnPlateau reducing learning rate to 0.0004182119504548609.
+
+Epoch 69: val_accuracy did not improve from 0.69708
+427/427 - 15s - loss: 0.4973 - accuracy: 0.8156 - val_loss: 1.0924 - val_accuracy: 0.6818 - lr: 4.9787e-04 - 15s/epoch - 35ms/step
+Epoch 70/120
+
+Epoch 70: val_accuracy did not improve from 0.69708
+427/427 - 15s - loss: 0.4914 - accuracy: 0.8207 - val_loss: 1.0804 - val_accuracy: 0.6922 - lr: 4.1821e-04 - 15s/epoch - 36ms/step
+Epoch 71/120
+
+Epoch 71: val_accuracy improved from 0.69708 to 0.69847, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.4858 - accuracy: 0.8197 - val_loss: 1.1010 - val_accuracy: 0.6985 - lr: 4.1821e-04 - 16s/epoch - 38ms/step
+Epoch 72/120
+
+Epoch 72: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4890 - accuracy: 0.8208 - val_loss: 1.0913 - val_accuracy: 0.6922 - lr: 4.1821e-04 - 15s/epoch - 35ms/step
+Epoch 73/120
+
+Epoch 73: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4780 - accuracy: 0.8254 - val_loss: 1.1025 - val_accuracy: 0.6985 - lr: 4.1821e-04 - 15s/epoch - 35ms/step
+Epoch 74/120
+
+Epoch 74: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4783 - accuracy: 0.8228 - val_loss: 1.0885 - val_accuracy: 0.6825 - lr: 4.1821e-04 - 15s/epoch - 35ms/step
+Epoch 75/120
+
+Epoch 75: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4692 - accuracy: 0.8270 - val_loss: 1.0777 - val_accuracy: 0.6908 - lr: 4.1821e-04 - 15s/epoch - 35ms/step
+Epoch 76/120
+
+Epoch 76: ReduceLROnPlateau reducing learning rate to 0.00035129803349263965.
+
+Epoch 76: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4673 - accuracy: 0.8261 - val_loss: 1.0977 - val_accuracy: 0.6929 - lr: 4.1821e-04 - 15s/epoch - 36ms/step
+Epoch 77/120
+
+Epoch 77: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4600 - accuracy: 0.8282 - val_loss: 1.0910 - val_accuracy: 0.6894 - lr: 3.5130e-04 - 15s/epoch - 35ms/step
+Epoch 78/120
+
+Epoch 78: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4630 - accuracy: 0.8277 - val_loss: 1.1465 - val_accuracy: 0.6845 - lr: 3.5130e-04 - 15s/epoch - 36ms/step
+Epoch 79/120
+
+Epoch 79: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4516 - accuracy: 0.8320 - val_loss: 1.1296 - val_accuracy: 0.6894 - lr: 3.5130e-04 - 15s/epoch - 35ms/step
+Epoch 80/120
+
+Epoch 80: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4440 - accuracy: 0.8371 - val_loss: 1.1261 - val_accuracy: 0.6943 - lr: 3.5130e-04 - 15s/epoch - 35ms/step
+Epoch 81/120
+
+Epoch 81: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4479 - accuracy: 0.8340 - val_loss: 1.1302 - val_accuracy: 0.6971 - lr: 3.5130e-04 - 15s/epoch - 35ms/step
+Epoch 82/120
+
+Epoch 82: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4375 - accuracy: 0.8382 - val_loss: 1.1526 - val_accuracy: 0.6887 - lr: 3.5130e-04 - 15s/epoch - 35ms/step
+Epoch 83/120
+
+Epoch 83: ReduceLROnPlateau reducing learning rate to 0.0003.
+
+Epoch 83: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4426 - accuracy: 0.8376 - val_loss: 1.1202 - val_accuracy: 0.6978 - lr: 3.5130e-04 - 15s/epoch - 36ms/step
+Epoch 84/120
+
+Epoch 84: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4442 - accuracy: 0.8380 - val_loss: 1.1228 - val_accuracy: 0.6915 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 85/120
+
+Epoch 85: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4278 - accuracy: 0.8428 - val_loss: 1.1544 - val_accuracy: 0.6978 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 86/120
+
+Epoch 86: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4253 - accuracy: 0.8430 - val_loss: 1.1407 - val_accuracy: 0.6936 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 87/120
+
+Epoch 87: val_accuracy did not improve from 0.69847
+427/427 - 15s - loss: 0.4238 - accuracy: 0.8442 - val_loss: 1.1742 - val_accuracy: 0.6894 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 88/120
+
+Epoch 88: val_accuracy improved from 0.69847 to 0.70404, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.4190 - accuracy: 0.8437 - val_loss: 1.1905 - val_accuracy: 0.7040 - lr: 3.0000e-04 - 16s/epoch - 39ms/step
+Epoch 89/120
+
+Epoch 89: val_accuracy did not improve from 0.70404
+427/427 - 15s - loss: 0.4123 - accuracy: 0.8469 - val_loss: 1.1820 - val_accuracy: 0.7006 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 90/120
+
+Epoch 90: val_accuracy did not improve from 0.70404
+427/427 - 15s - loss: 0.4162 - accuracy: 0.8467 - val_loss: 1.1970 - val_accuracy: 0.6999 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 91/120
+
+Epoch 91: val_accuracy did not improve from 0.70404
+427/427 - 15s - loss: 0.4132 - accuracy: 0.8482 - val_loss: 1.1858 - val_accuracy: 0.6985 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 92/120
+
+Epoch 92: val_accuracy did not improve from 0.70404
+427/427 - 15s - loss: 0.4101 - accuracy: 0.8492 - val_loss: 1.1740 - val_accuracy: 0.6992 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 93/120
+
+Epoch 93: val_accuracy did not improve from 0.70404
+427/427 - 15s - loss: 0.4019 - accuracy: 0.8509 - val_loss: 1.1805 - val_accuracy: 0.6957 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 94/120
+
+Epoch 94: val_accuracy improved from 0.70404 to 0.70613, saving model to drive/MyDrive/best_model.h5
+427/427 - 16s - loss: 0.4005 - accuracy: 0.8552 - val_loss: 1.1547 - val_accuracy: 0.7061 - lr: 3.0000e-04 - 16s/epoch - 38ms/step
+Epoch 95/120
+
+Epoch 95: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3997 - accuracy: 0.8528 - val_loss: 1.2122 - val_accuracy: 0.6978 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 96/120
+
+Epoch 96: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3932 - accuracy: 0.8556 - val_loss: 1.1813 - val_accuracy: 0.6950 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 97/120
+
+Epoch 97: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3990 - accuracy: 0.8522 - val_loss: 1.1884 - val_accuracy: 0.6992 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 98/120
+
+Epoch 98: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3938 - accuracy: 0.8557 - val_loss: 1.1934 - val_accuracy: 0.7019 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 99/120
+
+Epoch 99: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3880 - accuracy: 0.8567 - val_loss: 1.1758 - val_accuracy: 0.6929 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 100/120
+
+Epoch 100: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3930 - accuracy: 0.8544 - val_loss: 1.2148 - val_accuracy: 0.6957 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 101/120
+
+Epoch 101: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3880 - accuracy: 0.8565 - val_loss: 1.2193 - val_accuracy: 0.6943 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 102/120
+
+Epoch 102: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3894 - accuracy: 0.8582 - val_loss: 1.2202 - val_accuracy: 0.6971 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 103/120
+
+Epoch 103: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3825 - accuracy: 0.8598 - val_loss: 1.1902 - val_accuracy: 0.6845 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 104/120
+
+Epoch 104: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3854 - accuracy: 0.8589 - val_loss: 1.1860 - val_accuracy: 0.6950 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 105/120
+
+Epoch 105: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3834 - accuracy: 0.8572 - val_loss: 1.2318 - val_accuracy: 0.6985 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 106/120
+
+Epoch 106: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3773 - accuracy: 0.8635 - val_loss: 1.2381 - val_accuracy: 0.6915 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 107/120
+
+Epoch 107: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3797 - accuracy: 0.8606 - val_loss: 1.1910 - val_accuracy: 0.6845 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 108/120
+
+Epoch 108: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3734 - accuracy: 0.8617 - val_loss: 1.2241 - val_accuracy: 0.6859 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 109/120
+
+Epoch 109: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3669 - accuracy: 0.8640 - val_loss: 1.2293 - val_accuracy: 0.6936 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 110/120
+
+Epoch 110: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3691 - accuracy: 0.8629 - val_loss: 1.2920 - val_accuracy: 0.6873 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 111/120
+
+Epoch 111: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3665 - accuracy: 0.8637 - val_loss: 1.2488 - val_accuracy: 0.6929 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 112/120
+
+Epoch 112: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3675 - accuracy: 0.8640 - val_loss: 1.2332 - val_accuracy: 0.6950 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 113/120
+
+Epoch 113: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3615 - accuracy: 0.8676 - val_loss: 1.2346 - val_accuracy: 0.6964 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 114/120
+
+Epoch 114: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3653 - accuracy: 0.8659 - val_loss: 1.2185 - val_accuracy: 0.7006 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 115/120
+
+Epoch 115: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3597 - accuracy: 0.8700 - val_loss: 1.2461 - val_accuracy: 0.6943 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 116/120
+
+Epoch 116: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3535 - accuracy: 0.8721 - val_loss: 1.2542 - val_accuracy: 0.6929 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 117/120
+
+Epoch 117: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3579 - accuracy: 0.8697 - val_loss: 1.2284 - val_accuracy: 0.6992 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 118/120
+
+Epoch 118: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3560 - accuracy: 0.8688 - val_loss: 1.2614 - val_accuracy: 0.6894 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+Epoch 119/120
+
+Epoch 119: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3514 - accuracy: 0.8709 - val_loss: 1.2896 - val_accuracy: 0.6936 - lr: 3.0000e-04 - 15s/epoch - 36ms/step
+Epoch 120/120
+
+Epoch 120: val_accuracy did not improve from 0.70613
+427/427 - 15s - loss: 0.3466 - accuracy: 0.8727 - val_loss: 1.2664 - val_accuracy: 0.6901 - lr: 3.0000e-04 - 15s/epoch - 35ms/step
+

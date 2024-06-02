@@ -40,7 +40,7 @@ High Depth Convolutional Layers: The use of multiple convolutional layers, parti
 # When i fine tuned I pinpointed these parameters:
 
 🧠ELU > RELU
-ELU Activation: ELU (Exponential Linear Unit) activation functions are used instead of more common ReLU to help the model learn and converge faster. ELU helps in reducing the vanishing gradient problem, which is beneficial when training deeper networks like ours.
+ELU Activation: ELU (Exponential Linear Unit) activation functions are used instead of more common ReLU to help the model learn and converge faster. ELU helps in reducing the vanishing gradient problem, which is beneficial when training deeper networks like this
 
 🧠DROPOUT PINPOINTED TO 22
 Dropout and MaxPooling: Strategically placed dropout layers at 23% rate help in preventing overfitting by randomly dropping units during the training process, which promotes the development of a more generalized model. MaxPooling is used to reduce the spatial dimensions of the output volumes, which not only helps in reducing the computational load but also in extracting dominant features which are invariant to small changes in the input space.
