@@ -4,7 +4,6 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow.keras import Sequential  # type: ignore
 import face_recognition
-import warnings
 
 def load_test_data(filepath):
     df = pd.read_csv(filepath)
@@ -35,6 +34,7 @@ def calculate_accuracy(y_true, y_pred):
 
 def main():
     # Load test data
+
     test_filepath = '../data/test_with_emotions.csv'
     X_test, y_test = load_test_data(test_filepath)
 
