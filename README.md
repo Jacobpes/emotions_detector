@@ -55,7 +55,6 @@ Optimizer and Learning Rate Adjustments: The Nadam optimizer is chosen for its e
 🧠2X 128 LAYERS IN THE MIDDLE WORKS LIKE AN ATTENTION MECHANISM
 🧠stratify=y_train -> SMALLER TEST SET 
 
-Model: "sequential_47"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
