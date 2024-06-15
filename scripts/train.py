@@ -63,18 +63,19 @@ def create_model():
         Dropout(0.22, name='dropout_2'),
         Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_5'),
         BatchNormalization(name='batchnorm_5'),
-        Conv2D(512, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_6'),
+        Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_6'),
         BatchNormalization(name='batchnorm_6'),
         MaxPooling2D(pool_size=(2, 2), name='maxpool2d_3'),
         Dropout(0.22, name='dropout_3'),
         Flatten(name='flatten'),
-        Dense(256, activation='elu', kernel_initializer='he_normal', name='dense_1'),
+        Dense(128, activation='elu', kernel_initializer='he_normal', name='dense_1'),
         BatchNormalization(name='batchnorm_7'),
         Dropout(0.22, name='dropout_4'),
         Dense(7, activation='softmax', name='out_layer')
     ])
-    model.compile(optimizer=Nadam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, name='Nadam'), 
-    loss='categorical_crossentropy', metrics=['accuracy']) 
+    model.compile(optimizer=Nadam(learning_rate=0.001), 
+                  loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1), 
+                  metrics=['accuracy'])
     model.summary()
     return model
 
