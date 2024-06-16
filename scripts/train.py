@@ -2,17 +2,19 @@ import os
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Dense, Conv2D, BatchNormalization, MaxPooling2D, Dropout, Flatten  # type: ignore
-from tensorflow.keras.models import Sequential# type: ignore
-from tensorflow.keras.optimizers import Nadam# type: ignore
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau# type: ignore
-from tensorflow.keras.utils import to_categorical# type: ignore
-from tensorflow.keras.preprocessing.image import ImageDataGenerator# type: ignore
-from tensorflow.keras.callbacks import TensorBoard# type: ignore
+from tensorflow.keras.layers import Input, Dense, Conv2D, BatchNormalization, MaxPooling2D, Dropout, Flatten, Concatenate
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.optimizers import Nadam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import cv2
+import mediapipe as mp
+import pickle
 
-# Set GPU if available
+# Configure GPU settings
 def configure_gpu():
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
@@ -24,62 +26,65 @@ def configure_gpu():
     else:
         print("CUDA is not available. TensorFlow will use CPU.")
 
-# Load the training data from the CSV file and process it for training the model
+# Process DataFrame to extract features and labels
 def process_df(df):
     df['pixels'] = df['pixels'].apply(lambda x: np.fromstring(x, dtype=float, sep=' '))
     X, y = [], []
+    face_mesh = mp.solutions.face_mesh.FaceMesh(static_image_mode=True)
+    
     for _, row in df.iterrows():
         image = row['pixels'].reshape(48, 48, 1)
-        X.append(image)
+        mesh_data = extract_face_mesh(image, face_mesh)
+        combined_data = np.concatenate((image.flatten(), mesh_data))
+        X.append(combined_data)
         y.append(row['emotion'])
+    
     X = np.array(X) / 255.0
     y = to_categorical(np.array(y), num_classes=7)
     return X, y
 
-def load_data(train_filepath):
-    if not os.path.exists(train_filepath):
-        print(f"Error: The file does not exist.")
-        return None, None, None, None, None, None
-    df_train = pd.read_csv(train_filepath)
-    X_train, y_train = process_df(df_train)
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.05, random_state=40)
+def extract_face_mesh(image, face_mesh):
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    result = face_mesh.process(image_rgb)
+    if not result.multi_face_landmarks:
+        return np.zeros(468 * 3)  # 468 landmarks, 3 coordinates (x, y, z)
+    
+    landmarks = result.multi_face_landmarks[0].landmark
+    mesh_data = np.array([[lm.x, lm.y, lm.z] for lm in landmarks]).flatten()
+    return mesh_data
+
+# Load training data and split into training and validation sets
+def load_data(filepath):
+    if not os.path.exists(filepath):
+        print(f"Error: The file {filepath} does not exist.")
+        return None, None, None, None
+    df = pd.read_csv(filepath)
+    X, y = process_df(df)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.05, random_state=40)
     return X_train, X_val, y_train, y_val
 
-# Sequential model definition
-def create_model():
-    model = Sequential([
-        Input(shape=(48, 48, 1)),
-        Conv2D(512, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_1'),
-        BatchNormalization(name='batchnorm_1'),
-        Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_2'),
-        BatchNormalization(name='batchnorm_2'),
-        MaxPooling2D(pool_size=(2, 2), name='maxpool2d_1'),
-        Dropout(0.22, name='dropout_1'),
-        Conv2D(128, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_3'),
-        BatchNormalization(name='batchnorm_3'),
-        Conv2D(128, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_4'),
-        BatchNormalization(name='batchnorm_4'),
-        MaxPooling2D(pool_size=(2, 2), name='maxpool2d_2'),
-        Dropout(0.22, name='dropout_2'),
-        Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_5'),
-        BatchNormalization(name='batchnorm_5'),
-        Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer='he_normal', name='conv2d_6'),
-        BatchNormalization(name='batchnorm_6'),
-        MaxPooling2D(pool_size=(2, 2), name='maxpool2d_3'),
-        Dropout(0.22, name='dropout_3'),
-        Flatten(name='flatten'),
-        Dense(128, activation='elu', kernel_initializer='he_normal', name='dense_1'),
-        BatchNormalization(name='batchnorm_7'),
-        Dropout(0.22, name='dropout_4'),
-        Dense(7, activation='softmax', name='out_layer')
-    ])
+# Create and compile the model
+def create_model(input_shape):
+    image_input = Input(shape=(48 * 48 + 468 * 3,))
+    x = Dense(1024, activation='elu', kernel_initializer='he_normal')(image_input)
+    x = BatchNormalization()(x)
+    x = Dropout(0.25)(x)
+    x = Dense(512, activation='elu', kernel_initializer='he_normal')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.25)(x)
+    x = Dense(256, activation='elu', kernel_initializer='he_normal')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.25)(x)
+    output = Dense(7, activation='softmax')(x)
+
+    model = Model(inputs=image_input, outputs=output)
     model.compile(optimizer=Nadam(learning_rate=0.001), 
                   loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1), 
                   metrics=['accuracy'])
     model.summary()
     return model
 
-# Fit the model with the training data and validate with the validation data.
+# Train the model and save history
 def fit_model(model, X_train, y_train, X_val, y_val):
     datagen = ImageDataGenerator(
         rotation_range=15, width_shift_range=0.15, height_shift_range=0.15,
@@ -87,7 +92,7 @@ def fit_model(model, X_train, y_train, X_val, y_val):
     )
     callbacks = [
         ReduceLROnPlateau(monitor='val_loss', factor=0.84, patience=7, min_lr=0.0003, verbose=1),
-        ModelCheckpoint('drive/MyDrive/best_model.h5', monitor='val_accuracy', save_best_only=True, verbose=1),
+        ModelCheckpoint('best_model.pkl', monitor='val_accuracy', save_best_only=True, verbose=1),
         TensorBoard(log_dir='./logs', histogram_freq=1, write_graph=True, write_images=True), 
         EarlyStopping(monitor='val_loss', patience=30, verbose=1)
     ]
@@ -95,33 +100,42 @@ def fit_model(model, X_train, y_train, X_val, y_val):
                         validation_data=(X_val, y_val), callbacks=callbacks, verbose=2)
     return history
 
+# Plot and save learning curves
+def plot_learning_curves(history):
+    plt.figure()
+    plt.plot(history.history['accuracy'], label='Train Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Model Accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(loc='upper left')
+    plt.savefig('learning_curves.png')
+    plt.show()
+
+    plt.figure()
+    plt.plot(history.history['loss'], label='Train Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Model Loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(loc='upper left')
+    plt.savefig('loss_curves.png')
+    plt.show()
+
 def main():
     configure_gpu()
     train_filepath = 'drive/MyDrive/train.csv'
     X_train, X_val, y_train, y_val = load_data(train_filepath)
 
     if X_train is not None:
-        model = create_model()
+        input_shape = X_train.shape[1:]
+        model = create_model(input_shape)
         history = fit_model(model, X_train, y_train, X_val, y_val)
-        model.save('drive/MyDrive/best_model.h5')
         
-        plt.plot(history.history['accuracy'])
-        plt.plot(history.history['val_accuracy'])
-        plt.title('Model accuracy')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Validation'], loc='upper left')
-        plt.savefig('learning_curves.png')
-        plt.show()
-        
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
-        plt.title('Model loss')
-        plt.ylabel('Loss')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Validation'], loc='upper left')
-        plt.savefig('loss_curves.png')
-        plt.show()
+        with open('../results/maybe_the_sexiest_model_alive.pkl', 'wb') as file:
+            pickle.dump(model, file)
+
+        plot_learning_curves(history)
 
 if __name__ == "__main__":
     main()

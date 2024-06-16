@@ -2,9 +2,22 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras import Sequential  # type: ignore
+from tensorflow.keras.models import load_model
 import face_recognition
+import cv2
+import mediapipe as mp
 import warnings
+import pickle
+
+def extract_face_mesh(image, face_mesh):
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    result = face_mesh.process(image_rgb)
+    if not result.multi_face_landmarks:
+        return np.zeros(468 * 3)  # 468 landmarks, 3 coordinates (x, y, z)
+
+    landmarks = result.multi_face_landmarks[0].landmark
+    mesh_data = np.array([[lm.x, lm.y, lm.z] for lm in landmarks]).flatten()
+    return mesh_data
 
 def load_test_data(filepath):
     df = pd.read_csv(filepath)
@@ -13,12 +26,15 @@ def load_test_data(filepath):
     X = []
     y = []
     images = []
+    face_mesh = mp.solutions.face_mesh.FaceMesh(static_image_mode=True)
 
     for _, row in df.iterrows():
         image = row['pixels'].reshape(48, 48).astype('uint8')
         face_locations = face_recognition.face_locations(image, model="hog")
         if face_locations:
-            X.append(image / 255.0)
+            mesh_data = extract_face_mesh(image, face_mesh)
+            combined_data = np.concatenate((image.flatten(), mesh_data))
+            X.append(combined_data / 255.0)
             y.append(row['emotion'])
             images.append(image)
 
@@ -35,14 +51,13 @@ def calculate_accuracy(y_true, y_pred):
 
 def main():
     # Load test data
-
     test_filepath = '../data/test_with_emotions.csv'
     X_test, y_test = load_test_data(test_filepath)
 
     # Load and compile model
-    model_path = '../results/models/sexiest_model_alive.pkl'
-    model = tf.keras.models.load_model(model_path)
-    model.compile(optimizer='Nadam', loss='categorical_crossentropy', metrics=['accuracy'])
+    model_path = '../results/sexiest_model_alive.pkl'
+    with open(model_path, 'rb') as file:
+        model = pickle.load(file)
 
     # Make predictions
     predictions = predict_emotions(model, X_test)
