@@ -3,76 +3,82 @@ import cv2
 import face_recognition
 import time
 import os
-from tensorflow.keras.models import load_model # type: ignore
+from tensorflow.keras.models import load_model  # type: ignore
 
-# Load the pre-trained emotion prediction model from the specified path with the custom objects
-model_path = '../results/models/best_model.h5'
+# Load the pre-trained emotion detection model
+model_path = '../results/models/sexiest_model_alive.pkl'
 emotion_model = load_model(model_path)
 
-# Define the emotion classes that the model can recognize
-emotion_classes = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
+# Emotion labels that the model can predict
+emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
-# Create an output directory for videos or images
+# Set up directory for saving outputs
 output_dir = '../results/preprocessing_test'
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+os.makedirs(output_dir, exist_ok=True)
 
-# Initialize the webcam. For some reason the builtin cam on Grit:lab mac is 1
-cap = cv2.VideoCapture(1)
+# Start the webcam (camera index may vary depending on the system)
+camera_index = 1
+cap = cv2.VideoCapture(camera_index)
 
-# Check if the webcam starts successfully
+# Check if the webcam initialized correctly
 if not cap.isOpened():
-    print("Error: Could not open webcam.")
+    print("Error: Could not access the webcam.")
     exit()
 
-print("Reading video stream ...")
-print("Press 'q' to quit the livestream.")
+print("Starting video stream...")
+print("Press 'q' to exit.")
 
-# Define the codec and settings for video writer object to save output video
-video_path = os.path.join(output_dir, 'input_video.mp4')
-out = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*'mp4v'), 300, (int(cap.get(3)), int(cap.get(4))))
+# Configure video writer to save the output
+video_filename = os.path.join(output_dir, 'input_video.mp4')
+frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+video_writer = cv2.VideoWriter(video_filename, cv2.VideoWriter_fourcc(*'mp4v'), 20, (frame_width, frame_height))
 
 start_time = time.time()
 
 while True:
-    ret, frame = cap.read()  # Read a frame from the webcam
+    ret, frame = cap.read()  # Capture frame-by-frame
     if not ret:
-        print("Error: Failed to capture image.")
+        print("Error: Unable to capture frame.")
         break
 
-    out.write(frame)  # Write the frame to the output video file
+    video_writer.write(frame)  # Save the frame to the video file
 
-    rgb_frame = frame[:, :, ::-1]  # Convert the image from BGR to RGB format
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert frame to RGB
     face_locations = face_recognition.face_locations(rgb_frame)  # Detect faces in the frame
 
     for face_location in face_locations:
-        top, right, bottom, left = face_location  # Unpack the coordinates of the face
-        face = frame[top:bottom, left:right]  # Extract the face from the frame
-        face = cv2.resize(face, (48, 48))  # Resize the face to the size expected by the model
-        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)  # Convert the face to grayscale
-        face = np.expand_dims(face, axis=-1)  # Add a channel dimension
-        face = np.expand_dims(face, axis=0) / 255.0  # Normalize pixel values and add a batch dimension
+        top, right, bottom, left = face_location
+        face = frame[top:bottom, left:right]  # Extract face region
+        face = cv2.resize(face, (48, 48))  # Resize face to 48x48 pixels
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)  # Convert face to grayscale
+        face = face.astype('float32') / 255.0  # Normalize pixel values
+        face = np.expand_dims(face, axis=-1)  # Add channel dimension
+        face = np.expand_dims(face, axis=0)  # Add batch dimension
 
-        emotion_prediction = emotion_model.predict(face)  # Predict the emotion of the detected face
-        emotion_label_index = np.argmax(emotion_prediction)  # Find the index of the highest prediction
-        emotion_label = emotion_classes[emotion_label_index]  # Map the index to the corresponding emotion
-        emotion_prob = np.max(emotion_prediction) * 100  # Calculate the probability of the predicted emotion
+        # Predict the emotion of the face
+        emotion_prediction = emotion_model.predict(face)
+        emotion_index = np.argmax(emotion_prediction)
+        emotion_label = emotion_labels[emotion_index]
+        emotion_confidence = np.max(emotion_prediction) * 100
 
-        cv2.rectangle(frame, (left, top), (right, bottom), (255, 0, 0), 2)  # Draw a rectangle around the face
-        cv2.putText(frame, f"{emotion_label}, {emotion_prob:.0f}%", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)  # Display the emotion and probability
+        # Draw rectangle around the face and label it with emotion and confidence
+        cv2.rectangle(frame, (left, top), (right, bottom), (255, 0, 0), 2)
+        cv2.putText(frame, f"{emotion_label}, {emotion_confidence:.0f}%", (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
 
-        current_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))  # Format the current time
-        print(f"Preprocessing ...\n {current_time} : {emotion_label} , {emotion_prob:.0f}%")  # Print the emotion label and probability with timestamp
+        elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+        print(f"{elapsed_time} - Emotion: {emotion_label}, Confidence: {emotion_confidence:.0f}%")
 
-    cv2.imshow('Face Detection Livestream', frame)  # Show the frame with the detected faces and emotions
+    # Display the video frame with emotion annotations
+    cv2.imshow('Emotion Detection Live Stream', frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):  # Exit if 'q' is pressed
         break
 
-    if time.time() - start_time >= 300:  # Stop after 5 minutes for testing
+    if time.time() - start_time >= 300:  # Automatically stop after 5 minutes
         break
 
-# Release the webcam and video writer resources
+# Release resources and close windows
 cap.release()
-out.release()
+video_writer.release()
 cv2.destroyAllWindows()
