@@ -45,10 +45,21 @@ while True:
     video_writer.write(frame)  # Save the frame to the video file
 
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert frame to RGB
-    face_locations = face_recognition.face_locations(rgb_frame)  # Detect faces in the frame
+    face_landmarks_list = face_recognition.face_landmarks(rgb_frame)  # Detect faces and facial landmarks in the frame
 
-    for face_location in face_locations:
-        top, right, bottom, left = face_location
+    for face_landmarks in face_landmarks_list:
+        # Draw facial landmarks
+        for facial_feature in face_landmarks.keys():
+            color = (0, 255, 0) if "eye" in facial_feature else (0, 0, 255) if "lip" in facial_feature else (255, 0, 0)
+            for point in face_landmarks[facial_feature]:
+                cv2.circle(frame, point, 2, color, -1)
+
+        # Extract the face location from the landmarks
+        top = min([point[1] for point in face_landmarks['chin']])
+        bottom = max([point[1] for point in face_landmarks['chin']])
+        left = min([point[0] for point in face_landmarks['chin']])
+        right = max([point[0] for point in face_landmarks['chin']])
+
         face = frame[top:bottom, left:right]  # Extract face region
         face = cv2.resize(face, (48, 48))  # Resize face to 48x48 pixels
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)  # Convert face to grayscale
